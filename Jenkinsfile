@@ -4,7 +4,7 @@ pipeline {
         PROJECT_ID = 'du01-android---wedding'
         CLUSTER_NAME = 'du01-test-deploy'
         LOCATION = 'us-central1-a'
-        CREDENTIALS_ID = 'du01-test-deploy'
+        CREDENTIALS_ID = '2c23a60c-36cb-42e0-b94e-919ed740a19d'
         DOCKER_HUB_USERNAME = 'hungnv93'
         DOCKER_HUB_REPOSITORY_NAME = 'hello'
     }
@@ -53,5 +53,13 @@ pipeline {
                 step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
             }
         }
+
+        // stage('Deploying App to Kubernetes') {
+        //     steps {
+        //         script {
+        //         kubernetesDeploy(configs: "deployment.yml", kubeconfigId: "kubernetes")
+        //         }
+        //     }
+        // }
     }    
 }
