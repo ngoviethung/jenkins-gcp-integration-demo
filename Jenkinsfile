@@ -27,8 +27,13 @@ pipeline {
                     sh 'ls -la'
                     sh 'cat Dockerfile'
 
-                    // Xây dựng Docker image
-                    myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
+                    // Xây dựng Docker image với nhật ký chi tiết
+                    try {
+                        myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
+                    } catch (Exception e) {
+                        echo "Failed to build Docker image: ${e.getMessage()}"
+                        error("Build failed")
+                    }
                 }
             }
         }
