@@ -14,19 +14,20 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Check Modified Directories') {
+            steps {
+                script {
+                    def changedDirectories = sh(script: "git diff --name-only HEAD^ HEAD", returnStdout: true).trim().split('\n').collect { it.split('/')[0] as String }.unique()
+                    echo "Changed directories: ${changedDirectories}"
+                }
+            }
+        }
         stage("Build image") {
             steps {
                 script {
                     // In thông tin biến môi trường để debug
                     echo "Building Docker image: ${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}"
                     
-                    // Đảm bảo Docker đang chạy
-                    sh 'docker version'
-
-                    // Kiểm tra Dockerfile và nội dung thư mục hiện tại
-                    sh 'ls -la'
-                    sh 'cat Dockerfile'
-
                     // Xây dựng Docker image với nhật ký chi tiết
                     try {
                         myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
