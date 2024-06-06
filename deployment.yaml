@@ -20,7 +20,6 @@ spec:
       containers:
         - name: hello
           image: hungnv93/hello:latest
-          imagePullPolicy: Always
           ports:
           - containerPort: 5000
             name: hello
