@@ -35,22 +35,6 @@ pipeline {
                 }
             }
         }
-        // Hàm để xây dựng Docker image 1
-        def buildImage1() {
-            stage("Build image 1") {
-                steps {
-                    script {
-                        echo "Building Docker image: ${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}"
-                        try {
-                            myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
-                        } catch (Exception e) {
-                            echo "Failed to build Docker image: ${e.getMessage()}"
-                            error("Build failed")
-                        }
-                    }
-                }
-            }
-        }
         
         stage("Push image") {
             steps {
@@ -77,4 +61,21 @@ pipeline {
         //     }
         // }
     }    
+}
+
+// Hàm để xây dựng Docker image 1
+def buildImage1() {
+    stage("Build image 1") {
+        steps {
+            script {
+                echo "Building Docker image: ${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}"
+                try {
+                    myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
+                } catch (Exception e) {
+                    echo "Failed to build Docker image: ${e.getMessage()}"
+                    error("Build failed")
+                }
+            }
+        }
+    }
 }
