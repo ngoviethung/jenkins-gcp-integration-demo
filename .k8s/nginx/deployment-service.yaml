@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: nginx
+        tier: backend
+    spec:
+      volumes:
+        - name: upload
+          persistentVolumeClaim:
+            claimName: nfs
+        - name: config
+          configMap:
+            name: nginx-config
+            items:
+              - key: config
+                path: site.conf
+      containers:
+        - name: nginx
+          image: hungnv93/sdu01-web_server:v0.0.2
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: upload
+              mountPath: /var/www/html/public/uploads
+            - name: config
+              mountPath: /etc/nginx/conf.d
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "200m" #tuong duong 0.5 cpu
+              memory: "256Mi"
+
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    tier: backend
+spec:
+  selector:
+    app: nginx
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 80

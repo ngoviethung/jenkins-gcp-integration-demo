@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-image
+  labels:
+    tier: backend
+    layer: queue-consumer-image
+    queue: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      tier: backend
+      layer: queue-consumer-image
+      queue: default
+  template:
+    metadata:
+      labels:
+        tier: backend
+        layer: queue-consumer-image
+        queue: default
+    spec:
+      containers:
+        - name: queue-consumer-image
+          image: hungnv93/sdu01-cli:v0.0.2
+          command:
+            - php
+          args:
+            - artisan
+            - rabbitmq:consume
+            - merge_image
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secret
+          volumeMounts:
+            - name: upload
+              mountPath: /var/www/html/public/uploads
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "200m" #tuong duong 0.5 cpu
+              memory: "256Mi"
+      volumes:
+        - name: upload
+          persistentVolumeClaim:
+            claimName: nfs

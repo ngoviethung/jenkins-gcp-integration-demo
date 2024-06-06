@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    tier: backend
+data:
+  APP_NAME: "Laravel"
+  APP_ENV: "production"
+  APP_DEBUG: "true"
+  DEBUGBAR_ENABLED: "false"
+  APP_URL: "http://super-du01.sboomtools.net"
+
+  DB_CONNECTION: "mysql"
+  DB_HOST: "mysql-service"
+  DB_PORT: "3306"
+  DB_DATABASE: "data"
+
+  DB_CONNECTION_TWO: "mysql2"
+  DB_HOST_TWO: "15.235.42.114"
+  DB_PORT_TWO: "33061"
+  DB_DATABASE_TWO: "data"
+
+  MONGODB_HOST: "mongo-service"
+  MONGODB_PORT: "27017"
+  MONGODB_DATABASE: "data"
+
+  BROADCAST_DRIVER: "log"
+  CACHE_DRIVER: "file"
+  QUEUE_CONNECTION: "sync"
+  SESSION_DRIVER: "database"
+  SESSION_CONNECTION: "mysql"
+  SESSION_LIFETIME: "10080"
+
+  REDIS_HOST: "127.0.0.1"
+  REDIS_PORT: "6379"
+
+  MAIL_DRIVER: "smtp"
+  MAIL_HOST: "smtp.mailtrap.io"
+  MAIL_PORT: "2525"
+  MAIL_ENCRYPTION: "null"
+
+  MIX_PUSHER_APP_CLUSTER: "${PUSHER_APP_CLUSTER}"
+
+  APP_ID: "1"
+  URL_MEDIA: "http://super-reference.sboomtools.net/"
+  URL_CDN: "https://sdu01.b-cdn.net/"
+
+  MQ_HOST: "rabbit-mq"
+  MQ_PORT: "5672"
+
+  JWT_TTL: "null"
+  JWT_REFRESH_TTL: "null"

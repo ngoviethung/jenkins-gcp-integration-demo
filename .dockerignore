@@ -1,0 +1,7 @@
+.docker
+/vendor
+/node_modules
+.env
+pull.sh
+push.sh
+.k8s

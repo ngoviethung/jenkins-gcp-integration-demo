@@ -1,0 +1,31 @@
+
+.cropperImage {
+    border-bottom: 1px solid;
+    padding-bottom: 50px;
+}
+label.no-resize-tiny:after{
+    content: none !important;
+}
+.app-header.bg-light .navbar-brand {
+    opacity: 1;
+}
+.parent-front-layer{
+    position: relative;
+    z-index: 5;
+}
+.parent-left-layer{
+    position: relative;
+    z-index: 4;
+}
+.parent-mid-layer{
+    position: relative;
+    z-index: 3;
+}
+.parent-right-layer{
+    position: relative;
+    z-index: 2;
+}
+.parent-back-layer{
+    position: relative;
+    z-index: 1;
+}

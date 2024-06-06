@@ -1,0 +1,16 @@
+/vendor
+.env
+access.log
+error.log
+composer.lock
+public/uploads/.tmb
+dbdata
+redisdb
+push.sh
+/.docker/rabbitmq/
+/.docker/rabbitmq_data/
+/.docker/mongodb
+/public/export_to_local
+.k8s/terraform/.teraform
+secret.yaml
+secret.yml

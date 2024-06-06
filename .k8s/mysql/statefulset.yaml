@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-statefullset
+  labels:
+    tier: backend
+    layer: database
+spec:
+  selector:
+    matchLabels:
+      tier: backend
+      layer: database
+  serviceName: mysql-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        tier: backend
+        layer: database
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        args:
+            - "--ignore-db-dir=lost+found"
+        ports:
+        - name: mysql
+          containerPort: 3306
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: '1'
+        - name: MYSQL_DATABASE
+          value: data
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: DB_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: DB_PASSWORD
+        volumeMounts:
+        - name: db-vol
+          mountPath: /var/lib/mysql
+          subPath: mysql
+        resources:
+            limits:
+              cpu: "0.5"
+              memory: "1Gi"
+            requests:
+              cpu: "0.3"
+              memory: "512Mi"
+        livenessProbe:
+          exec:
+            command:
+            - bash
+            - -c
+            - mysqladmin -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ping
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - bash
+            - -c
+            - mysql -h 127.0.0.1 -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -e "SELECT 1"
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1
+      volumes:
+      - name: db-vol
+        persistentVolumeClaim:
+          claimName: mysql-pvc

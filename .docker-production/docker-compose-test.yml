@@ -1,0 +1,73 @@
+version: '3.5'
+services:
+    # We need to run the FPM container for our application
+    laravel.fpm:
+        build:
+            context: ../
+            dockerfile: .docker-production/Dockerfile
+            target: fpm_server
+        image: laravel-in-kubernetes/fpm_server
+        # We can override any env values here.
+        # By default the .env in the project root will be loaded as the environment for all containers
+        environment:
+            APP_DEBUG: "true"
+        # Mount the codebase, so any code changes we make will be propagated to the running application
+        #volumes:
+            # Here we mount in our codebase so any changes are immediately reflected into the container
+            #- ../:/var/www/html
+        networks:
+            - laravel-in-kubernetes
+
+    # Run the web server container for static content, and proxying to our FPM container
+    laravel.web:
+        build:
+            context: ../
+            dockerfile: .docker-production/Dockerfile
+            target: web_server
+        image: laravel-in-kubernetes/web_server
+        # Expose our application port (80) through a port on our local machine (8080)
+        ports:
+            - 8199:80
+        environment:
+            # We need to pass in the new FPM hst as the name of the fpm container on port 9000
+            FPM_HOST: "laravel.fpm:9000"
+        # Mount the public directory into the container so we can serve any static files directly when they change
+        volumes:
+            # Here we mount in our codebase so any changes are immediately reflected into the container
+            - ../public:/var/www/html/public
+        networks:
+            - laravel-in-kubernetes
+    # Run the Laravel Scheduler
+    laravel.cron:
+        build:
+            context: ../
+            dockerfile: .docker-production/Dockerfile
+            target: cron
+        image: laravel-in-kubernetes/cron
+        # Here we mount in our codebase so any changes are immediately reflected into the container
+        volumes:
+            # Here we mount in our codebase so any changes are immediately reflected into the container
+            - ../:/var/www/html
+        networks:
+            - laravel-in-kubernetes
+
+
+    # The Mysql
+    mysql:
+      #container_name: container_name_database
+      image: mysql:5.7
+      restart: unless-stopped
+      volumes:
+        - .docker/dbdata:/var/lib/mysql
+
+      environment:
+        - "MYSQL_DATABASE=data"
+        - "MYSQL_ROOT_PASSWORD=123456"
+      ports:
+        - "33179:3306"
+      networks:
+        - laravel-in-kubernetes
+    
+
+networks:
+    laravel-in-kubernetes:

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-statefullset
+  labels:
+    tier: backend
+    layer: mongo
+spec:
+  selector:
+    matchLabels:
+      tier: backend
+      layer: mongo
+  serviceName: mongo-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        tier: backend
+        layer: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:7.0.7
+        ports:
+        - name: mongo
+          containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: MONGO_INITDB_ROOT_USERNAME
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: MONGO_INITDB_ROOT_PASSWORD
+        volumeMounts:
+        - name: db-vol
+          mountPath: /data/db
+          subPath: mongo
+        resources:
+            limits:
+              cpu: "0.5"
+              memory: "1Gi"
+            requests:
+              cpu: "0.3"
+              memory: "512Mi"
+
+      volumes:
+      - name: db-vol
+        persistentVolumeClaim:
+          claimName: mongo-pvc

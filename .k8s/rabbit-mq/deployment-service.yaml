@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbit-mq
+  labels:
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbit-mq
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: rabbit-mq
+        tier: backend
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rabbit-pvc
+      containers:
+        - name: rabbit-mq
+          image: rabbitmq:3-management-alpine
+          ports:
+            - containerPort: 5672
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/rabbitmq
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "200m" #tuong duong 0.5 cpu
+              memory: "256Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbit-mq
+  labels:
+    tier: backend
+spec:
+  selector:
+    app: rabbit-mq
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 5672

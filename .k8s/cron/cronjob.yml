@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kubernetes-scheduler
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: scheduler
+            image: hungnv93/sdu01-cli:v0.0.2
+            command:
+              - php
+            args:
+              - artisan
+              - schedule:run
+            envFrom:
+              - configMapRef:
+                  name: app-config
+              - secretRef:
+                  name: app-secret
+            volumeMounts:
+            - name: upload
+              mountPath: /var/www/html/public/uploads
+          restartPolicy: OnFailure
+
+          volumes:
+          - name: upload
+            persistentVolumeClaim:
+              claimName: nfs

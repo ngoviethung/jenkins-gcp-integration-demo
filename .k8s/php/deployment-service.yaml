@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  labels:
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: php
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: php
+        tier: backend
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: php
+          image: hungnv93/sdu01-fpm_server:v0.0.2
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secret
+          volumeMounts:
+            - name: upload
+              mountPath: /var/www/html/public/uploads
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: "512Mi"
+            requests:
+              cpu: "100m" #tuong duong 0.1 cpu
+              memory: "256Mi"
+
+      volumes:
+        - name: upload
+          persistentVolumeClaim:
+            claimName: nfs
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: php
+  labels:
+    tier: backend
+spec:
+  selector:
+    app: php
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 9000

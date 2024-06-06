@@ -1,0 +1,1 @@
+{!!$entry->{$column['name']}!!}
