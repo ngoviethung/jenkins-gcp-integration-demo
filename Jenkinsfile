@@ -17,44 +17,20 @@ pipeline {
         stage('Check Modified Directories') {
             steps {
                 script {
-                    // Lấy danh sách các thư mục được thay đổi từ Git
                     def changedDirectories = sh(script: "git diff --name-only HEAD^ HEAD", returnStdout: true).trim().split('\n').collect { it.split('/')[0] as String }.unique()
                     echo "Changed directories: ${changedDirectories}"
-
-                    // Kiểm tra xem thư mục "public" có trong danh sách thư mục được thay đổi hay không
-                    def containsPublicDirectory = changedDirectories.any { it == 'public' }
-
-                    // Nếu thư mục "public" được thay đổi, chạy Build image 1, ngược lại chạy Build image 2
-                    if (containsPublicDirectory) {
-                        echo "Thư mục 'public' đã được thay đổi, chạy Build image 1"
-                        buildImage1()
-                    } else {
-                        echo "Thư mục 'public' không được thay đổi, chạy Build image 2"
-                        
-                    }
                 }
             }
         }
-        
-        
-
-        // stage('Deploying App to Kubernetes') {
-        //     steps {
-        //         script {
-        //         kubernetesDeploy(configs: "deployment.yml", kubeconfigId: "kubernetes")
-        //         }
-        //     }
-        // }
-    }    
-}
-
-// Hàm để xây dựng Docker image 1
-def buildImage1() {
-    stages {
-        stage("Build image 1") {
+        stage("Build image") {
             steps {
                 script {
+                    // In thông tin biến môi trường để debug
                     echo "Building Docker image: ${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}"
+                    
+                    // Đảm bảo Docker đang chạy
+                    sh 'docker version'
+                    // Xây dựng Docker image với nhật ký chi tiết
                     try {
                         myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
                     } catch (Exception e) {
@@ -65,20 +41,28 @@ def buildImage1() {
             }
         }
         stage("Push image") {
-                steps {
-                    script {
-                        docker.withRegistry('https://registry.hub.docker.com', 'dockerID') {
-                            myapp.push("latest")
-                            myapp.push("${env.BUILD_ID}")
-                        }
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerID') {
+                        myapp.push("latest")
+                        myapp.push("${env.BUILD_ID}")
                     }
                 }
-            }        
+            }
+        }        
         stage('Deploy to GKE') {
             steps {
                 sh "sed -i 's/hello:latest/hello:${env.BUILD_ID}/g' deployment.yaml"
                 step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
             }
         }
-    }
+
+        // stage('Deploying App to Kubernetes') {
+        //     steps {
+        //         script {
+        //         kubernetesDeploy(configs: "deployment.yml", kubeconfigId: "kubernetes")
+        //         }
+        //     }
+        // }
+    }    
 }
