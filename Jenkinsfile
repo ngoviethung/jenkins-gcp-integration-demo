@@ -23,6 +23,10 @@ pipeline {
                     // Đảm bảo Docker đang chạy
                     sh 'docker version'
 
+                    // Kiểm tra Dockerfile và nội dung thư mục hiện tại
+                    sh 'ls -la'
+                    sh 'cat Dockerfile'
+
                     // Xây dựng Docker image
                     myapp = docker.build("${env.DOCKER_HUB_USERNAME}/${env.DOCKER_HUB_REPOSITORY_NAME}:${env.BUILD_ID}")
                 }
